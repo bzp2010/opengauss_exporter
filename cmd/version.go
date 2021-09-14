@@ -3,9 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/prometheus/common/version"
 	"github.com/spf13/cobra"
-
-	"opengauss_exporter/internal/utils"
 )
 
 var versionCmd = &cobra.Command{
@@ -17,5 +16,5 @@ var versionCmd = &cobra.Command{
 }
 
 func printVersionInfo()  {
-	fmt.Printf("openGauss Exporter\nVersion: %s\nBuild Time: %s\nGitHash: %s", utils.Version, utils.BuildTime, utils.GitHash)
+	fmt.Printf("openGauss Exporter\nVersion: %s\nBuild Time: %s\nGitHash: %s", version.Version, version.BuildDate, version.Branch)
 }
