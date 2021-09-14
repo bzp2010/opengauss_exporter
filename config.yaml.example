@@ -1,0 +1,27 @@
+server:
+  http:
+    host: 0.0.0.0
+    port: 9188
+
+data_sources:
+  - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5432/postgres"
+    duration: 5s
+    max_retry: 3
+    master: true
+    enable_settings: true
+    enable_os_run_info: true
+    enable_total_memory_detail: true
+    enable_sql_count: true
+    enable_instance_time: true
+    enable_postgresql_exporter: true
+
+  - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5433/postgres"
+    duration: 8s
+    max_retry: 3
+    master: true
+    enable_settings: true
+    enable_os_run_info: true
+    enable_total_memory_detail: true
+    enable_sql_count: true
+    enable_instance_time: true
+    enable_postgresql_exporter: true
