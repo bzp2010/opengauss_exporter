@@ -1,0 +1,61 @@
+name: E2E Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  e2e-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: setup go
+        uses: actions/setup-go@v2.1.3
+        with:
+          go-version: "1.14"
+
+      - name: start openGauss Instance1
+        run: |
+          docker run --name opengauss1 --privileged=true -d -e GS_PASSWORD=TestNode123 -p 5432:5432 enmotech/opengauss:2.0.1
+
+      - name: start openGauss Instance2
+        run: |
+          docker run --name opengauss2 --privileged=true -d -e GS_PASSWORD=TestNode123 -p 5433:5433 enmotech/opengauss:2.0.1
+
+      - name: wait for database initialize finished
+        run: |
+          sleep 120
+
+      - name: modify exporter config
+        run: |
+          mv config.yaml.example config.yml
+          sed -i 's/gaussdb:gaussdb/gaussdb:TestNode123/' config.yml
+
+      - name: build openGauss Exporter
+        run: |
+          go build -o openguass_exporter -ldflags "-X 'github.com/prometheus/common/version.Version=1.0.0' -X 'github.com/prometheus/common/version.BuildData=$(date)'" main.go
+
+      - name: start openGauss Exporter
+        run: |
+          ./openguass_exporter serve -c config.yml
+
+      - name: wait for first scrape
+        run: |
+          sleep 15
+
+      - name: save metrics
+        run: |
+          wget -o metrics.txt http://127.0.0.1:9188
+
+      - name: archive metrics
+        uses: actions/upload-artifact@v2
+        with:
+          name: metrics.txt
+          path: metrics.txt
+          retention-days: 5
