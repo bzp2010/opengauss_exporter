@@ -15,50 +15,43 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: setup go
-        uses: actions/setup-go@v2.1.3
-        with:
-          go-version: "1.14"
-
-      - name: start openGauss Instance1
+      - name: Start openGauss Servers
         run: |
-          docker run --name opengauss1 --privileged=true -d -e GS_PASSWORD=TestNode123 -p 5432:5432 enmotech/opengauss:2.0.1
+          docker run --name opengauss1 --privileged=true -d -e GS_PASSWORD=TestNode123! -p 5432:5432 enmotech/opengauss:2.0.1
+          docker run --name opengauss2 --privileged=true -d -e GS_PASSWORD=TestNode123! -p 5433:5433 enmotech/opengauss:2.0.1
 
-      - name: start openGauss Instance2
-        run: |
-          docker run --name opengauss2 --privileged=true -d -e GS_PASSWORD=TestNode123 -p 5433:5433 enmotech/opengauss:2.0.1
-
-      - name: wait for database initialize finished
+      - name: Wait for database initialize finished
         run: |
           sleep 120
 
-      - name: modify exporter config
+      - name: Modify exporter config
         run: |
-          mv config.yaml.example config.yml
-          sed -i 's/gaussdb:gaussdb/gaussdb:TestNode123/' config.yml
+          sed -i 's/gaussdb:gaussdb/gaussdb:TestNode123!/' config.yaml.example
+          sed -i 's/127.0.0.1/172.17.0.1/' config.yaml.example
 
-      - name: build openGauss Exporter docker image
+      - name: Build openGauss Exporter docker image
         run: |
           docker build -t opengauss_exporter .
 
-      - name: start openGauss Exporter container
+      - name: Start openGauss Exporter container
         run: |
-          docker run -v config.yml:/usr/local/openguass_exporter/config.yml -p 9188:9188 -e CONFIG_FILE="config.yml" opengauss_exporter
+          cp config.yaml.example config.yaml
+          docker run -d -v $(pwd)/config.yaml:/etc/opengauss_exporter.yaml -p 9188:9188 opengauss_exporter -c /etc/opengauss_exporter.yaml
 
-      - name: wait for first scrape
+      - name: Wait for first scrape
         run: |
           sleep 15
 
-      - name: save metrics
+      - name: Save metrics
         run: |
-          wget -o metrics.txt http://127.0.0.1:9188
+          curl http://127.0.0.1:9188/metrics > metrics.txt
 
-      - name: archive metrics
+      - name: Archive metrics
         uses: actions/upload-artifact@v2
         with:
           name: metrics.txt
           path: metrics.txt
           retention-days: 5
 
-      - name: Setup debugger
-        uses: mxschmitt/action-tmate@v1
+      # - name: Setup debugger
+      #   uses: mxschmitt/action-tmate@v1
