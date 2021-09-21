@@ -5,7 +5,8 @@ WORKDIR /usr/local/opengauss_exporter
 ADD . .
 
 RUN chmod +x ./build.sh && \
-    ./build.sh
+    ./build.sh && \
+    ls
 
 FROM alpine:3.14 as prod
 
