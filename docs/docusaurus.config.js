@@ -7,7 +7,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
   title: 'openGuass Exporter',
   tagline: 'Prometheus Exporter for openGauss',
   url: 'https://bzp2010.github.io/opengauss_exporter/',
-  baseUrl: '/',
+  baseUrl: '/opengauss_exporter/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
@@ -16,7 +16,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
   i18n: {
     defaultLocale: 'zh-CN',
-    locales: ['zh-CN', 'fr'],
+    locales: ['zh-CN', 'en'],
   },
 
   presets: [
