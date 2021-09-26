@@ -1,0 +1,33 @@
+name: Deploy Documents
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: actions/setup-node@v2.4.0
+        with:
+          node-version: "14"
+
+      - name: Install Dependencies
+        run: |
+          cd docs && yarn install
+
+      - name: Build
+        run: |
+          cd docs && yarn build
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3.8.0
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/build
+          publish_branch: gh-pages
