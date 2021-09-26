@@ -1,9 +1,7 @@
 ---
-sidebar_position: 1
+title: 简介
 slug: "/"
 ---
-
-# 简介 {#introduction}
 
 ## openGauss 数据库 {#opengauss}
 
