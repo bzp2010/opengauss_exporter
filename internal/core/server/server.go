@@ -13,12 +13,20 @@ import (
 
 type Option func(*options)
 type options struct {
-	HTTP *httpOption
+	HTTP  *httpOption
+	HTTPS *httpsOption
 }
 
 type httpOption struct {
 	Host string
 	Port string
+}
+
+type httpsOption struct {
+	Host    string
+	Port    string
+	SSLCert string
+	SSLKey  string
 }
 
 type Manager struct {
@@ -48,6 +56,10 @@ func NewManager(opts ...Option) *Manager {
 	s.setupRouters()
 
 	return s
+}
+
+func (s *Manager) With(o Option) {
+	o(s.options)
 }
 
 func (s *Manager) setupMiddlewares() {
@@ -81,7 +93,21 @@ func (s *Manager) Start(errSig chan error) {
 		}()
 	}
 
-	//TODO support HTTPS server
+	//  start HTTPS server
+	if s.options.HTTPS != nil {
+		addr := net.JoinHostPort(s.options.HTTPS.Host, s.options.HTTPS.Port)
+		utils.GetLogger().Infow("HTTPS server listening on address",
+			"address", addr,
+		)
+
+		go func() {
+			err := http.ListenAndServeTLS(addr, s.options.HTTPS.SSLCert, s.options.HTTPS.SSLKey,s.mux)
+			if err != nil {
+				utils.GetLogger().Errorf("HTTPS server listening failed: %v", err)
+				errSig <- err
+			}
+		}()
+	}
 }
 
 func (s *Manager) Stop() {
@@ -96,6 +122,20 @@ func WithHTTPServer(host string, port string) Option {
 		options.HTTP = &httpOption{
 			Host: host,
 			Port: port,
+		}
+	}
+}
+
+func WithHTTPSServer(host string, port string, certFile string, keyFile string) Option {
+	return func(options *options) {
+		if host == "" {
+			host = "127.0.0.1"
+		}
+		options.HTTPS = &httpsOption{
+			Host: host,
+			Port: port,
+			SSLCert: certFile,
+			SSLKey: keyFile,
 		}
 	}
 }

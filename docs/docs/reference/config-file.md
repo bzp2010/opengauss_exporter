@@ -3,10 +3,15 @@ title: 配置文件
 ---
 
 ```yaml
-server:            # server configure
-  http:            # HTTP server
-    host: 0.0.0.0  # host eg. 127.0.0.1
-    port: 9188     # port eg. 9188
+server:               # server configure
+  http:               # HTTP server
+    host: 0.0.0.0     # host eg. 127.0.0.1
+    port: 9188        # port eg. 9188
+  https:              # HTTPS server
+    host: 0.0.0.0     # host eg. 127.0.0.1
+    port: 9189        # port eg. 9189
+    cert: "/etc/ssl/cert.pem"   # cert file path
+    key: "/etc/ssl/private.key" # private key file path
 
 data_sources:      # data source configure
   - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5432/postgres"

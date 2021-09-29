@@ -2,6 +2,11 @@ server:
   http:
     host: 0.0.0.0
     port: 9188
+  # https:
+  #   host: 0.0.0.0
+  #   port: 9189
+  #   cert: "cert path"
+  #   key: "key path"
 
 data_sources:
   - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5432/postgres"

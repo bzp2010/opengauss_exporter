@@ -47,7 +47,7 @@ func runExporter() error {
 
 	select {
 	case err := <-serverErrSig:
-		panic(fmt.Errorf("HTTP server start error: %v", err))
+		panic(fmt.Errorf("HTTP(s) server start error: %v", err))
 		return err
 	case <-quit:
 		scrapeManager.Stop()
@@ -70,6 +70,16 @@ func setupServerManager(errSig chan error) *server.Manager {
 			viper.GetString("server.http.port"),
 		),
 	)
+
+	if viper.IsSet("server.https") {
+		serverManager.With(server.WithHTTPSServer(
+			viper.GetString("server.https.host"),
+			viper.GetString("server.https.port"),
+			viper.GetString("server.https.cert"),
+			viper.GetString("server.https.key"),
+		))
+	}
+
 	serverManager.Start(errSig)
 
 	return serverManager
