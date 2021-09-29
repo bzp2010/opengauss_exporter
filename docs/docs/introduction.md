@@ -74,3 +74,7 @@ Prometheus Server 直接从监控目标中或者间接通过推送网关来拉�
 openGauss Exporter 是为 openGauss 数据库实现的 Prometheus Exporter，它通过 SQL 从数据库节点中读取运行环境指标等信息，并组装成 Prometheus Metric 格式，向外提供采集接口。
 
 它可以同时连接多个 openGauss 节点，以一定的时间间隔采集运行数据。这些数据将被临时存储在内存缓存中，以供采集 API 调用。
+
+:::note 
+当前仅测试 openGauss 2.0.1 版本兼容性
+:::
