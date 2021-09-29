@@ -27,7 +27,6 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
         docs: {
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
-          // Please change this to your repo.
           editUrl: 'https://github.com/bzp2010/opengauss_exporter/edit/main/docs/',
         },
         blog: {
@@ -71,7 +70,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} openGauss`,
+        copyright: `Copyright © ${new Date().getFullYear()} openGauss Community`,
       },
       prism: {
         theme: lightCodeTheme,
