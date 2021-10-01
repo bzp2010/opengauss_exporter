@@ -41,9 +41,17 @@ data_sources:
 复制以上配置文件存储成名为`config.yaml`的文件
 
 3. 启动 openGauss Exporter
-```docker
+```shell
 docker run -d -v $(pwd)/config.yaml:/etc/opengauss_exporter.yaml -p 9188:9188 bzp2010/opengauss_exporter -c /etc/opengauss_exporter.yaml
 ```
+
+:::note关于镜像版本
+当前可能并无正式版本发布，因此请使用dev镜像进行测试，即 `bzp2010/opengauss_exporter:dev`
+
+```shell
+docker run -d -v $(pwd)/config.yaml:/etc/opengauss_exporter.yaml -p 9188:9188 bzp2010/opengauss_exporter:dev -c /etc/opengauss_exporter.yaml
+```
+:::
 
 4. 创建 Prometheus 配置文件
 ```yaml
@@ -64,7 +72,7 @@ scrape_configs:
 复制以上配置文件存储成名为`prometheus.yaml`的文件
 
 5. 启动 Prometheus Server
-```docker
+```shell
 docker run -d -p 9090:9090 -v $(pwd)/prometheus.yaml:/etc/prometheus/prometheus.yml prom/prometheus
 ```
 
