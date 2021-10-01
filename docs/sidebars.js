@@ -32,6 +32,7 @@ module.exports = {
             collapsed: true,
             items: [
                 'reference/config-file',
+                'reference/http-api',
                 'reference/cli',
             ]
         }
