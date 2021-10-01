@@ -2,12 +2,14 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
+	"opengauss_exporter/internal/core/cache"
 	"opengauss_exporter/internal/utils"
 )
 
@@ -69,6 +71,15 @@ func (s *Manager) setupMiddlewares() {
 func (s *Manager) setupRouters() {
 	s.mux.Get("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		promhttp.Handler().ServeHTTP(w, r)
+	})
+
+	s.mux.Get("/refresh", func(writer http.ResponseWriter, request *http.Request) {
+		err := cache.Metrics.Clear()
+		if err != nil {
+			_, _ = writer.Write([]byte(fmt.Sprintf("refresh failed: %v", err)))
+			return
+		}
+		_, _ = writer.Write([]byte("refresh success"))
 	})
 }
 
