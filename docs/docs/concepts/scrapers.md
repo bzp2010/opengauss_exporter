@@ -4,11 +4,19 @@ title: 刮削器
 
 ## 刮削器列表
 
+### 核心
+
+#### og_up
+数据库实例是否正常运行。
+
+#### og_version
+数据库版本号，在 label 中进行标记，例如
+```text
+{og="2.1.0",pg="9.2.4",server="xxxx"}
+```
+
 ### PostgreSQL Exporter {#postgresql_exporter}
 这个刮削器实现了 PostgreSQL 原版 Exporter 的刮削功能，它从 `pg_` 的一些系统视图中获取运行数据。
-
-#### gs_up
-数据库实例是否正常运行。
 
 #### pg_stat_bgwriter
 该视图显示关于后端写进程活动的统计信息。  
