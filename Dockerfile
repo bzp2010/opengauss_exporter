@@ -4,7 +4,8 @@ WORKDIR /usr/local/opengauss_exporter
 
 ADD . .
 
-RUN chmod +x ./build.sh && ./build.sh
+RUN apk add git \ 
+    && chmod +x ./build.sh && ./build.sh
 
 FROM alpine:3.14 as prod
 
