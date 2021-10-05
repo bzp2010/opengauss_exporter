@@ -34,6 +34,7 @@ type Task struct {
 	duration     prometheus.Gauge
 	error        prometheus.Gauge
 	dataSourceUp prometheus.Gauge
+	version      prometheus.Gauge
 	totalScrapes prometheus.Counter
 
 	scrapers []Scraper
@@ -195,33 +196,49 @@ func (t *Task) queryDBVersion() error {
 		}
 	}
 
+	// generate version labels
+	versionInfo := make(map[string]string)
+	for k, v := range t.constLabels {
+		versionInfo[k] = v
+	}
+	versionInfo["pg"] = t.pgVersion.String()
+	versionInfo["og"] = t.ogVersion.String()
+
+	// set version information
+	t.version = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace:   exporter.NamespaceRoot,
+		Name:        "version",
+		Help:        "Version information of database nodes",
+		ConstLabels: versionInfo,
+	})
+
 	return nil
 }
 
 func (t *Task) setupTaskMetrics() {
 	t.duration = prometheus.NewGauge(prometheus.GaugeOpts{
-		Namespace:   exporter.Namespace,
+		Namespace:   exporter.NamespaceRoot,
 		Subsystem:   exporter.SubsystemScrapeTask,
 		Name:        "last_scrape_duration_seconds",
 		Help:        "Duration of the last scrape of metrics from openGauss.",
 		ConstLabels: t.constLabels,
 	})
 	t.totalScrapes = prometheus.NewCounter(prometheus.CounterOpts{
-		Namespace:   exporter.Namespace,
+		Namespace:   exporter.NamespaceRoot,
 		Subsystem:   exporter.SubsystemScrapeTask,
 		Name:        "scrapes_total",
 		Help:        "Total number of times openGauss was scraped for metrics.",
 		ConstLabels: t.constLabels,
 	})
 	t.error = prometheus.NewGauge(prometheus.GaugeOpts{
-		Namespace:   exporter.Namespace,
+		Namespace:   exporter.NamespaceRoot,
 		Subsystem:   exporter.SubsystemScrapeTask,
 		Name:        "last_scrape_error",
 		Help:        "Whether the last scrape of metrics from openGauss resulted in an error (1 for error, 0 for success).",
 		ConstLabels: t.constLabels,
 	})
 	t.dataSourceUp = prometheus.NewGauge(prometheus.GaugeOpts{
-		Namespace:   exporter.Namespace,
+		Namespace:   exporter.NamespaceRoot,
 		Name:        "up",
 		Help:        "Whether the last scrape of metrics from openGauss was able to connect to the server (1 for yes, 0 for no).",
 		ConstLabels: t.constLabels,
@@ -270,7 +287,7 @@ func (t *Task) scrape() {
 
 func (t *Task) mergeTaskMetrics(scrapeMetrics []prometheus.Metric) []prometheus.Metric {
 	taskMetrics := []prometheus.Metric{
-		t.duration, t.totalScrapes, t.error, t.dataSourceUp,
+		t.duration, t.totalScrapes, t.error, t.dataSourceUp, t.version,
 	}
 
 	return append(taskMetrics, scrapeMetrics...)
