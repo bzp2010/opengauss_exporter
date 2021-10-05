@@ -12,7 +12,8 @@ type Exporter struct{}
 var (
 	Name = "opengauss_exporter"
 
-	Namespace = "gs"
+	NamespaceView = "gs"
+	NamespaceRoot = "og"
 
 	SubsystemScrapeTask = "scrape_task"
 

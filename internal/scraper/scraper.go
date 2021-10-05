@@ -7,7 +7,7 @@ import (
 )
 
 func newDesc(subsystem string, name string, help string, labels prometheus.Labels, hiddenNamespace... bool) *prometheus.Desc {
-	namespace := exporter.Namespace
+	namespace := exporter.NamespaceView
 	if len(hiddenNamespace) > 0 && hiddenNamespace[0] {
 		namespace = ""
 	}
