@@ -51,6 +51,9 @@ func runExporter() error {
 		return err
 	}
 
+	// init scrapers
+	scraper.Init()
+
 	// setup mainly modules
 	setupPrometheusCollector()
 	scrapeManager := setupScrapeManager()
@@ -103,36 +106,11 @@ func setupServerManager(errSig chan error) *server.Manager {
 func setupScrapeManager() *scrape.Manager {
 	scrapeErrSig := make(chan error, 10000)
 	scrapeManager := scrape.NewManager()
-	for _, source := range config.DataSources {
+	for _, taskConfig := range config.Tasks {
 		task := scrape.NewTask(
-			scrape.WithDataSource(source),
+			scrape.WithConfig(taskConfig),
 			scrape.WithErrorSig(scrapeErrSig),
 		)
-
-		if source.EnableSettings {
-			task.With(scrape.WithScraper(scraper.NewPgSettingsScraper()))
-		}
-
-		if source.EnableOSRunInfo {
-			task.With(scrape.WithScraper(scraper.NewGsOSRunInfoScraper()))
-		}
-
-		if source.EnableTotalMemoryDetail {
-			task.With(scrape.WithScraper(scraper.NewGsTotalMemoryDetailScraper()))
-		}
-
-		if source.EnableSQLCount {
-			task.With(scrape.WithScraper(scraper.NewGsSQLCountScraper()))
-		}
-
-		if source.EnableInstanceTime {
-			task.With(scrape.WithScraper(scraper.NewGsInstanceTimeScraper()))
-		}
-
-		if source.EnablePostgreSQLExporter {
-			task.With(scrape.WithScraper(scraper.NewBuiltinSQLScraper()))
-		}
-
 		scrapeManager.AddTask(task)
 	}
 	scrapeManager.Start()

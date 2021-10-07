@@ -54,14 +54,14 @@ func (s *gsOSRunInfo) metric(labels prometheus.Labels) prometheus.Metric {
 }
 
 func (g GsOSRunInfoScraper) Scrape(t *scrape.Task) ([]prometheus.Metric, []error, error) {
-	server := t.DataSource().Fingerprint()
+	server := t.Fingerprint
 
 	utils.GetLogger().Infow("Query GS_OS_RUN_INFO view",
 		"server", server,
 	)
 
 	query := "SELECT name, value, comments, cumulative FROM GS_OS_RUN_INFO;"
-	rows, err := t.DB().Query(query)
+	rows, err := t.DB.Query(query)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Query GS_OS_RUN_INFO view, server: %s, %v", server, err)
 	}
@@ -75,7 +75,7 @@ func (g GsOSRunInfoScraper) Scrape(t *scrape.Task) ([]prometheus.Metric, []error
 			return nil, nil, fmt.Errorf("Query GS_OS_RUN_INFO view failed, server: %s, %v", server, err)
 		}
 
-		if metric := osRunInfo.metric(t.ConstLabels()); metric != nil {
+		if metric := osRunInfo.metric(t.ConstLabels); metric != nil {
 			metrics = append(metrics, metric)
 		}
 	}

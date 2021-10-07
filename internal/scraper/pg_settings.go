@@ -128,14 +128,14 @@ func (s *pgSetting) normaliseUnit() (val float64, unit string, err error) {
 }
 
 func (p PgSettingsScraper) Scrape(t *scrape.Task) ([]prometheus.Metric, []error, error) {
-	server := t.DataSource().Fingerprint()
+	server := t.Fingerprint
 
 	utils.GetLogger().Infow("Query PG_SETTINGS view",
 		"server", server,
 	)
 
 	query := "SELECT name, setting, COALESCE(unit, ''), short_desc, vartype FROM pg_settings WHERE vartype IN ('bool', 'integer', 'real');"
-	rows, err := t.DB().Query(query)
+	rows, err := t.DB.Query(query)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Query PG_SETTINGS view failed, server: %s, %v", server, err)
 	}
@@ -149,7 +149,7 @@ func (p PgSettingsScraper) Scrape(t *scrape.Task) ([]prometheus.Metric, []error,
 			return nil, nil, fmt.Errorf("Query PG_SETTINGS view failed, server: %s, %v", server, err)
 		}
 
-		metrics = append(metrics, settings.metric(t.ConstLabels()))
+		metrics = append(metrics, settings.metric(t.ConstLabels))
 	}
 
 	return metrics, nil, nil

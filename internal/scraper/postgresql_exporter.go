@@ -339,7 +339,7 @@ func makeDescMap(task *scrape.Task, metricMaps map[string]intermediateMetricMap)
 			// Check column version compatibility for the current map
 			// Force to discard if not compatible.
 			if columnMapping.supportedVersions != nil {
-				if !columnMapping.supportedVersions(task.PostgreSQLVersion()) {
+				if !columnMapping.supportedVersions(task.PGVersion) {
 					// It's very useful to be able to see what columns are being rejected.
 					utils.GetLogger().Warnw("Column is being forced to discard due to version incompatibility", "column", columnName)
 					thisMap[columnName] = MetricMap{
@@ -365,7 +365,7 @@ func makeDescMap(task *scrape.Task, metricMaps map[string]intermediateMetricMap)
 			case COUNTER:
 				thisMap[columnName] = MetricMap{
 					vtype: prometheus.CounterValue,
-					desc:  prometheus.NewDesc(fmt.Sprintf("%s_%s", namespace, columnName), columnMapping.description, variableLabels, task.ConstLabels()),
+					desc:  prometheus.NewDesc(fmt.Sprintf("%s_%s", namespace, columnName), columnMapping.description, variableLabels, task.ConstLabels),
 					conversion: func(in interface{}) (float64, bool) {
 						return gconv.Float64(in), true
 					},
@@ -373,7 +373,7 @@ func makeDescMap(task *scrape.Task, metricMaps map[string]intermediateMetricMap)
 			case GAUGE:
 				thisMap[columnName] = MetricMap{
 					vtype: prometheus.GaugeValue,
-					desc:  prometheus.NewDesc(fmt.Sprintf("%s_%s", namespace, columnName), columnMapping.description, variableLabels, task.ConstLabels()),
+					desc:  prometheus.NewDesc(fmt.Sprintf("%s_%s", namespace, columnName), columnMapping.description, variableLabels, task.ConstLabels),
 					conversion: func(in interface{}) (float64, bool) {
 						return gconv.Float64(in), true
 					},
@@ -382,7 +382,7 @@ func makeDescMap(task *scrape.Task, metricMaps map[string]intermediateMetricMap)
 				thisMap[columnName] = MetricMap{
 					histogram: true,
 					vtype:     prometheus.UntypedValue,
-					desc:      prometheus.NewDesc(fmt.Sprintf("%s_%s", namespace, columnName), columnMapping.description, variableLabels, task.ConstLabels()),
+					desc:      prometheus.NewDesc(fmt.Sprintf("%s_%s", namespace, columnName), columnMapping.description, variableLabels, task.ConstLabels),
 					conversion: func(in interface{}) (float64, bool) {
 						return gconv.Float64(in), true
 					},
@@ -402,7 +402,7 @@ func makeDescMap(task *scrape.Task, metricMaps map[string]intermediateMetricMap)
 			case MAPPEDMETRIC:
 				thisMap[columnName] = MetricMap{
 					vtype: prometheus.GaugeValue,
-					desc:  prometheus.NewDesc(fmt.Sprintf("%s_%s", namespace, columnName), columnMapping.description, variableLabels, task.ConstLabels()),
+					desc:  prometheus.NewDesc(fmt.Sprintf("%s_%s", namespace, columnName), columnMapping.description, variableLabels, task.ConstLabels),
 					conversion: func(in interface{}) (float64, bool) {
 						text, ok := in.(string)
 						if !ok {
@@ -419,7 +419,7 @@ func makeDescMap(task *scrape.Task, metricMaps map[string]intermediateMetricMap)
 			case DURATION:
 				thisMap[columnName] = MetricMap{
 					vtype: prometheus.GaugeValue,
-					desc:  prometheus.NewDesc(fmt.Sprintf("%s_%s_milliseconds", namespace, columnName), columnMapping.description, variableLabels, task.ConstLabels()),
+					desc:  prometheus.NewDesc(fmt.Sprintf("%s_%s_milliseconds", namespace, columnName), columnMapping.description, variableLabels, task.ConstLabels),
 					conversion: func(in interface{}) (float64, bool) {
 						var durationString string
 						switch t := in.(type) {
@@ -462,7 +462,7 @@ func makeQueryOverrideMap(task *scrape.Task, queryOverrides map[string][]Overrid
 		// ranges at test-time, so only 1 should ever match.
 		matched := false
 		for _, queryDef := range overrideDef {
-			if queryDef.versionRange(task.PostgreSQLVersion()) {
+			if queryDef.versionRange(task.PGVersion) {
 				resultMap[name] = queryDef.query
 				matched = true
 				break
@@ -470,7 +470,7 @@ func makeQueryOverrideMap(task *scrape.Task, queryOverrides map[string][]Overrid
 		}
 		if !matched {
 			utils.GetLogger().Warnw("No matched query override, disabling metric space",
-				"server", task.DataSource().Fingerprint(),
+				"server", task.Fingerprint,
 				"name", name,
 			)
 			resultMap[name] = ""
@@ -494,13 +494,13 @@ func (b BuiltinSQLScraper) Scrape(task *scrape.Task) ([]prometheus.Metric, []err
 
 	for namespace, mapping := range makeDescMap(task, builtinMetricMaps) {
 		utils.GetLogger().Infow("Querying namespace",
-			"server", task.DataSource().Fingerprint(),
+			"server", task.Fingerprint,
 			"namespace", namespace,
 		)
 
-		if mapping.master && !task.DataSource().Master {
+		if mapping.master && !task.Config().Master {
 			utils.GetLogger().Infow("Query skipped",
-				"server", task.DataSource().Fingerprint(),
+				"server", task.Fingerprint,
 				"namespace", namespace,
 			)
 			continue
@@ -546,12 +546,12 @@ func queryNamespaceMapping(task *scrape.Task, namespace string, mapping MetricMa
 	var err error
 
 	if !found {
-		rows, err = task.DB().Query(fmt.Sprintf("SELECT * FROM %s;", namespace)) // nolint: gas
+		rows, err = task.DB.Query(fmt.Sprintf("SELECT * FROM %s;", namespace)) // nolint: gas
 	} else {
-		rows, err = task.DB().Query(query)
+		rows, err = task.DB.Query(query)
 	}
 	if err != nil {
-		return []prometheus.Metric{}, []error{}, fmt.Errorf("Error running query on datasource %s: %s %v", task.DataSource().Fingerprint(), namespace, err)
+		return []prometheus.Metric{}, []error{}, fmt.Errorf("Error running query on datasource %s: %s %v", task.Fingerprint, namespace, err)
 	}
 	defer rows.Close()
 
@@ -662,7 +662,7 @@ func queryNamespaceMapping(task *scrape.Task, namespace string, mapping MetricMa
 			} else {
 				// Unknown metric. Report as untyped if scan to float64 works, else note an error too.
 				metricLabel := fmt.Sprintf("%s_%s", namespace, columnName)
-				desc := prometheus.NewDesc(metricLabel, fmt.Sprintf("Unknown metric from %s", namespace), mapping.labels, task.ConstLabels())
+				desc := prometheus.NewDesc(metricLabel, fmt.Sprintf("Unknown metric from %s", namespace), mapping.labels, task.ConstLabels)
 
 				// Its not an error to fail here, since the values are
 				// unexpected anyway.

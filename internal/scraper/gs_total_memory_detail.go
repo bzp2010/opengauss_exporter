@@ -42,14 +42,14 @@ func (s *gsTotalMemoryDetail) metric(labels prometheus.Labels) prometheus.Metric
 }
 
 func (g GsTotalMemoryDetailScraper) Scrape(t *scrape.Task) ([]prometheus.Metric, []error, error) {
-	server := t.DataSource().Fingerprint()
+	server := t.Fingerprint
 
 	utils.GetLogger().Infow("Query GS_TOTAL_MEMORY_DETAIL view",
 		"server", server,
 	)
 
 	query := "SELECT * FROM GS_TOTAL_MEMORY_DETAIL;"
-	rows, err := t.DB().Query(query)
+	rows, err := t.DB.Query(query)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Query GS_TOTAL_MEMORY_DETAIL view, server: %s, %v", server, err)
 	}
@@ -63,7 +63,7 @@ func (g GsTotalMemoryDetailScraper) Scrape(t *scrape.Task) ([]prometheus.Metric,
 			return nil, nil, fmt.Errorf("Query GS_TOTAL_MEMORY_DETAIL view failed, server: %s, %v", server, err)
 		}
 
-		if metric := totalMemoryDetail.metric(t.ConstLabels()); metric != nil {
+		if metric := totalMemoryDetail.metric(t.ConstLabels); metric != nil {
 			metrics = append(metrics, metric)
 		}
 	}

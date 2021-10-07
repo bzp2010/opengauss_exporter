@@ -8,25 +8,26 @@ server:
   #   cert: "cert path"
   #   key: "key path"
 
-data_sources:
+tasks:
   - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5432/postgres"
+    name: Test Server 1
     duration: 5s
-    max_retry: 3
     master: true
-    enable_settings: true
-    enable_os_run_info: true
-    enable_total_memory_detail: true
-    enable_sql_count: true
-    enable_instance_time: true
-    enable_postgresql_exporter: true
-
+    scrapers:
+      - postgresql_exporter
+      - pg_settings
+      - gs_os_run_info
+      - gs_instance_time
+      - gs_total_memory_detail
+      - gs_sql_count
   - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5433/postgres"
+    name: Test Server 2
     duration: 8s
-    max_retry: 3
     master: true
-    enable_settings: true
-    enable_os_run_info: true
-    enable_total_memory_detail: true
-    enable_sql_count: true
-    enable_instance_time: true
-    enable_postgresql_exporter: true
+    scrapers:
+      - postgresql_exporter
+      - pg_settings
+      - gs_os_run_info
+      - gs_instance_time
+      - gs_total_memory_detail
+      - gs_sql_count

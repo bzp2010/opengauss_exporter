@@ -1,39 +1,30 @@
 package config
 
 import (
-	"errors"
-	"fmt"
 	"net/url"
 	"time"
 
-	"github.com/gogf/gf/util/gconv"
 	"github.com/spf13/viper"
 
 	"opengauss_exporter/internal/utils"
 )
 
-type DataSource struct {
+type Task struct {
 	DSN      string
+	Name     string
 	Duration time.Duration
-	MaxRetry int
 	Master   bool
 
-	// features
-	EnableSettings           bool
-	EnableOSRunInfo          bool `c:"enable_os_run_info"`
-	EnableTotalMemoryDetail  bool
-	EnableSQLCount           bool `c:"enable_sql_count"`
-	EnableInstanceTime       bool
-	EnablePostgreSQLExporter bool `c:"enable_postgresql_exporter"`
+	Scrapers []string
 }
 
-func (d DataSource) Fingerprint() string {
-	serverURL, _ := url.Parse(d.DSN)
+func (t Task) Fingerprint() string {
+	serverURL, _ := url.Parse(t.DSN)
 	return serverURL.Host
 }
 
 var (
-	DataSources = make([]DataSource, 0)
+	Tasks = make([]Task, 0)
 )
 
 func Init(configFile string) error {
@@ -58,7 +49,7 @@ func Init(configFile string) error {
 		return err
 	}
 
-	err = setupDataSources()
+	err = setupTasks()
 	if err != nil {
 		return err
 	}
@@ -70,14 +61,10 @@ func setupServer() error {
 	return nil
 }
 
-func setupDataSources() error {
-	for key, val := range viper.Get("data_sources").([]interface{}) {
-		var dataSource DataSource
-		err := gconv.Struct(val, &dataSource)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Data source parse failed: index: %d", key))
-		}
-		DataSources = append(DataSources, dataSource)
+func setupTasks() error {
+	err := viper.UnmarshalKey("tasks", &Tasks)
+	if err != nil {
+		return err
 	}
 	return nil
 }

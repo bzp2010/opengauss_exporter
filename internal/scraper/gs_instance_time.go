@@ -6,7 +6,6 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"opengauss_exporter/internal/core/exporter"
 	"opengauss_exporter/internal/core/scrape"
 	"opengauss_exporter/internal/utils"
 )
@@ -42,12 +41,12 @@ func (s *gsInstanceTime) metric(labels prometheus.Labels) prometheus.Metric {
 }
 
 func (g GsInstanceTimeScraper) Scrape(t *scrape.Task) ([]prometheus.Metric, []error, error) {
-	server := t.ConstLabels()[exporter.LabelServer]
+	server := t.Fingerprint
 
 	utils.GetLogger().Infof("Query GS_INSTANCE_TIME view: server: %s", server)
 
 	query := "SELECT stat_name, value FROM GS_INSTANCE_TIME;"
-	rows, err := t.DB().Query(query)
+	rows, err := t.DB.Query(query)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Query GS_INSTANCE_TIME view, server: %s, %v", server, err)
 	}
@@ -61,7 +60,7 @@ func (g GsInstanceTimeScraper) Scrape(t *scrape.Task) ([]prometheus.Metric, []er
 			return nil, nil, fmt.Errorf("Query GS_INSTANCE_TIME view failed, server: %s, %v", server, err)
 		}
 
-		if metric := osRunInfo.metric(t.ConstLabels()); metric != nil {
+		if metric := osRunInfo.metric(t.ConstLabels); metric != nil {
 			metrics = append(metrics, metric)
 		}
 	}

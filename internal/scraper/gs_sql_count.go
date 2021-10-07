@@ -76,14 +76,14 @@ func (s *gsSQLCount) metric(labels prometheus.Labels) []prometheus.Metric {
 }
 
 func (g GsSQLCountScraper) Scrape(t *scrape.Task) ([]prometheus.Metric, []error, error) {
-	server := t.DataSource().Fingerprint()
+	server := t.Fingerprint
 
 	utils.GetLogger().Infow("Query GS_SQL_COUNT view",
 		"server", server,
 	)
 
 	query := "SELECT * FROM GS_SQL_COUNT;"
-	rows, err := t.DB().Query(query)
+	rows, err := t.DB.Query(query)
 	if err != nil {
 		return nil, nil, fmt.Errorf("Query GS_SQL_COUNT view, server: %s, %v", server, err)
 	}
@@ -111,7 +111,7 @@ func (g GsSQLCountScraper) Scrape(t *scrape.Task) ([]prometheus.Metric, []error,
 			return nil, nil, fmt.Errorf("Query GS_SQL_COUNT view failed, server: %s, %v", server, err)
 		}
 
-		metrics = append(metrics, sqlCount.metric(t.ConstLabels())...)
+		metrics = append(metrics, sqlCount.metric(t.ConstLabels)...)
 	}
 
 	return metrics, nil, nil
