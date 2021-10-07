@@ -14,4 +14,4 @@ WORKDIR /usr/local/opengauss_exporter
 COPY --from=build /usr/local/opengauss_exporter/opengauss_exporter ./
 COPY --from=build /usr/local/opengauss_exporter/config.yaml.example ./
 
-ENTRYPOINT ["/usr/local/opengauss_exporter/opengauss_exporter", "serve"]
+ENTRYPOINT ["/usr/local/opengauss_exporter/opengauss_exporter"]
