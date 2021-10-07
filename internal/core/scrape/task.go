@@ -34,6 +34,7 @@ type Task struct {
 	taskTotalScrapes prometheus.Counter
 	taskDuration     prometheus.Gauge
 	taskError        prometheus.Gauge
+	taskName         prometheus.Gauge
 	coreUp           prometheus.Gauge
 	coreVersion      prometheus.Gauge
 
@@ -148,6 +149,19 @@ func (t *Task) setupTaskMetrics() {
 		Help:        "Whether the last scrape of metrics from openGauss was able to connect to the server (1 for yes, 0 for no).",
 		ConstLabels: t.ConstLabels,
 	})
+
+	taskName := make(map[string]string)
+	for k, v := range t.ConstLabels {
+		taskName[k] = v
+	}
+	taskName["name"] = t.config.Name
+	t.taskName = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace:   exporter.NamespaceRoot,
+		Subsystem:   exporter.SubsystemScrapeTask,
+		Name:        "name",
+		Help:        "Scrape task name.",
+		ConstLabels: taskName,
+	})
 }
 
 func (t *Task) connectDataSource() (bool, error) {
@@ -247,7 +261,7 @@ func (t *Task) scrape() {
 
 	if !t.isConnected {
 		t.coreUp.Set(0)
-		_ = cache.Metrics.Set(t.Fingerprint, []prometheus.Metric{t.coreUp}, 0)
+		_ = cache.Metrics.Set(t.Fingerprint, []prometheus.Metric{t.taskName, t.coreUp}, 0)
 		return
 	}
 	t.coreUp.Set(1)
@@ -287,7 +301,7 @@ func (t *Task) scrape() {
 
 func (t *Task) mergeTaskMetrics(scrapeMetrics []prometheus.Metric) []prometheus.Metric {
 	taskMetrics := []prometheus.Metric{
-		t.taskDuration, t.taskTotalScrapes, t.taskError,
+		t.taskDuration, t.taskTotalScrapes, t.taskError, t.taskName,
 		t.coreUp, t.coreVersion,
 	}
 
