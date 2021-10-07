@@ -26,23 +26,25 @@ server:
     host: 0.0.0.0
     port: 9188       # metrics API endpoints
 
-data_sources:
+tasks:
   - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5432/postgres"
-    duration: 5s     # scrape metrics interval
-    max_retry: 3     # retry times on connect failed
-    master: true     # NOTICE temporarily useless
-    enable_settings: true             # pg_settings view
-    enable_os_run_info: true          # gs_os_run_info view
-    enable_total_memory_detail: true  # gs_total_memory_detail view
-    enable_sql_count: true            # gs_sql_count view
-    enable_instance_time: true        # gs_instance_time view
-    enable_postgresql_exporter: true  # this scraper come from postgresql_exporter 
+    name: Test Server 1
+    duration: 5s
+    master: true
+    scrapers:
+      - postgresql_exporter
+      - pg_settings
+      - gs_os_run_info
+      - gs_instance_time
+      - gs_total_memory_detail
+      - gs_sql_count
 ```
 ## Document
 [Go to document website](https://bzp2010.github.io/opengauss_exporter/)
 
 ## TODO List
 - [x] Add docker support for deploy
-- [ ] Add Grafana Dashboard template
 - [x] Add more metrics for OS status
 - [x] Add more E2E test case
+- [ ] Add metrics aggregation analysis
+- [ ] Add Grafana Dashboard template
