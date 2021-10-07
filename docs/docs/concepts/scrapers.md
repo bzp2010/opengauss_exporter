@@ -16,6 +16,8 @@ title: 刮削器
 ```
 
 ### PostgreSQL Exporter {#postgresql_exporter}
+> ID：postgresql_exporter
+
 这个刮削器实现了 PostgreSQL 原版 Exporter 的刮削功能，它从 `pg_` 的一些系统视图中获取运行数据。
 
 #### pg_stat_bgwriter
@@ -131,6 +133,8 @@ title: 刮削器
 **备注：当前视图在 openGauss 中不可用**
 
 ### PG_SETTING
+> ID：pg_settings
+
 这个刮削器实现了从 openGauss 数据库中获取数据库配置的功能，它从 `pg_settings` 视图中抓取全部的数据库配置。
 
 :::note
@@ -138,6 +142,8 @@ title: 刮削器
 :::
 
 ### GS_OS_RUN_INFO
+> ID：gs_os_run_info
+
 这个刮削器从 `GS_OS_RUN_INFO` 系统视图中获取数据库服务器运行情况。  
 维度：数据库节点
 
@@ -166,6 +172,8 @@ title: 刮削器
 :::
 
 ### GS_SQL_COUNT
+> ID：gs_sql_count
+
 这个刮削器从 `GS_SQL_COUNT` 系统视图中获取数据库中执行的SQL语句计数情况。  
 维度：数据库节点 - 数据库
 
@@ -199,6 +207,8 @@ title: 刮削器
 :::
 
 ### GS_INSTANCE_TIME
+> ID：gs_instance_time
+
 这个刮削器从 `GS_INSTANCE_TIME` 系统视图中获取当前数据库实例个阶段运行耗时状态。  
 维度：数据库节点 - 数据库
 
@@ -218,6 +228,8 @@ title: 刮削器
 :::
 
 ### GS_TOTAL_MEMORY_DETAIL
+> ID：gs_total_memory_detail
+
 这个刮削器从 `GS_TOTAL_MEMORY_DETAIL` 系统视图中获取当前数据库实例内存使用状态。  
 维度：数据库节点 - 数据库
 

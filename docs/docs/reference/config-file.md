@@ -13,29 +13,28 @@ server:               # server configure
     cert: "/etc/ssl/cert.pem"   # cert file path
     key: "/etc/ssl/private.key" # private key file path
 
-data_sources:      # data source configure
+tasks:    # scrape task configure
   - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5432/postgres"
-    duration: 5s   # scrape duration eg. 3s 5m 36h 1d12h
-    max_retry: 3   # max connect retries
-    master: true   # is master node (Not supported temporary)
-    
-    # enable or disable scraper
-    enable_settings: true             # pg_settings
-    enable_os_run_info: true          # gs_os_run_info
-    enable_total_memory_detail: true  # gs_total_memory_detail
-    enable_sql_count: true            # gs_sql_count
-    enable_instance_time: true        # gs_instance_time
-    enable_postgresql_exporter: true  # postgresql exporter
+    name: Test Server 1    # scrape task name (only for label)
+    duration: 5s           # scrape duration eg. 3s 5m 36h 1d12h
+    master: true           # is master node (master-slave architecture)
+    scrapers:              # enabled scraper (ALL scraper)
+      - postgresql_exporter     # cover PostgreSQL Exporter metrics
+      - pg_settings             # pg_settings view
+      - gs_os_run_info          # gs_os_run_info view
+      - gs_instance_time        # gs_instance_time view
+      - gs_total_memory_detail  # gs_total_memory_detail view
+      - gs_sql_count            # gs_sql_count view
 
   - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5433/postgres"
-    duration: 8s
-    max_retry: 3
+    name: Test Server 2
+    duration: 5s
     master: true
-    enable_settings: true
-    enable_os_run_info: true
-    enable_total_memory_detail: true
-    enable_sql_count: true
-    enable_instance_time: true
-    enable_postgresql_exporter: true
-
+    scrapers:
+      - postgresql_exporter
+      - pg_settings
+      - gs_os_run_info
+      - gs_instance_time
+      - gs_total_memory_detail
+      - gs_sql_count
 ```
