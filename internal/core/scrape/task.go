@@ -93,6 +93,7 @@ RETRY:
 		// retry
 		if needRetry {
 			t.connectRetry++
+			time.Sleep(5 * time.Second)
 			goto RETRY
 		} else {
 			t.errSig <- fmt.Errorf("Connect to database failed: server: %s err: %v", t.Fingerprint, err)
