@@ -87,6 +87,7 @@ func setupServerManager(errSig chan error) *server.Manager {
 			viper.GetString("server.http.host"),
 			viper.GetString("server.http.port"),
 		),
+		server.WithMiddlewares(viper.GetStringMap("server.middlewares")),
 	)
 
 	if viper.IsSet("server.https") {

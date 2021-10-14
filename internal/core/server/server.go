@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"opengauss_exporter/internal/core/cache"
@@ -15,8 +16,9 @@ import (
 
 type Option func(*options)
 type options struct {
-	HTTP  *httpOption
-	HTTPS *httpsOption
+	HTTP        *httpOption
+	HTTPS       *httpsOption
+	Middlewares map[string]interface{}
 }
 
 type httpOption struct {
@@ -35,6 +37,11 @@ type Manager struct {
 	options *options
 	mux     *chi.Mux
 	stopSig chan bool
+}
+
+var middlewareMap = map[string]func(next http.Handler) http.Handler{
+	"logger":     chiMiddleware.Logger,
+	"basic_auth": func(next http.Handler) http.Handler { return nil }, // only placeholder
 }
 
 // NewManager create a HTTP server for API endpoints
@@ -65,7 +72,25 @@ func (s *Manager) With(o Option) {
 }
 
 func (s *Manager) setupMiddlewares() {
-	//s.mux.Use(middleware.Logger)
+	for middlewareId, middlewareConfig := range s.options.Middlewares {
+		if middleware, ok := middlewareMap[middlewareId]; ok {
+			if middlewareId == "basic_auth" {
+				config := middlewareConfig.(map[string]interface{})
+				creds := map[string]string{}
+				for key, val := range config {
+					creds[key] = val.(string)
+				}
+				s.mux.Use(chiMiddleware.BasicAuth("opengauss_exporter", creds))
+				return
+			}
+			s.mux.Use(middleware)
+		} else {
+			utils.GetLogger().Errorw("HTTP server middleware not registered",
+				"middleware", middlewareId,
+			)
+		}
+	}
+
 }
 
 func (s *Manager) setupRouters() {
@@ -112,7 +137,7 @@ func (s *Manager) Start(errSig chan error) {
 		)
 
 		go func() {
-			err := http.ListenAndServeTLS(addr, s.options.HTTPS.SSLCert, s.options.HTTPS.SSLKey,s.mux)
+			err := http.ListenAndServeTLS(addr, s.options.HTTPS.SSLCert, s.options.HTTPS.SSLKey, s.mux)
 			if err != nil {
 				utils.GetLogger().Errorf("HTTPS server listening failed: %v", err)
 				errSig <- err
@@ -143,10 +168,16 @@ func WithHTTPSServer(host string, port string, certFile string, keyFile string) 
 			host = "127.0.0.1"
 		}
 		options.HTTPS = &httpsOption{
-			Host: host,
-			Port: port,
+			Host:    host,
+			Port:    port,
 			SSLCert: certFile,
-			SSLKey: keyFile,
+			SSLKey:  keyFile,
 		}
+	}
+}
+
+func WithMiddlewares(middlewares map[string]interface{}) func(options *options) {
+	return func(options *options) {
+		options.Middlewares = middlewares
 	}
 }

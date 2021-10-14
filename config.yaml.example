@@ -7,6 +7,10 @@ server:
   #   port: 9189
   #   cert: "cert path"
   #   key: "key path"
+    middlewares:
+      logger: {}
+  #   basic_auth:
+  #     user: "password"
 
 tasks:
   - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5432/postgres"
