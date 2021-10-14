@@ -1,0 +1,26 @@
+server:
+  http:
+    host: 0.0.0.0
+    port: 9188
+  #https:
+  #  host: 0.0.0.0
+  #  port: 9189
+  #  cert: ""
+  #  key: ""
+  middlewares:
+    logger: {}
+  #  basic_auth:
+  #    user: "password"
+
+tasks:
+  - dsn: "postgresql://gaussdb:openGauss!123@opengauss:5432/postgres"
+    name: Test Server 1
+    duration: 5s
+    master: true
+    scrapers:
+      - postgresql_exporter
+      - pg_settings
+      - gs_os_run_info
+      - gs_instance_time
+      - gs_total_memory_detail
+      - gs_sql_count

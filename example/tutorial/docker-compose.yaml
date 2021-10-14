@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  opengauss:
+    image: enmotech/opengauss:2.1.0
+    environment:
+      GS_PASSWORD: openGauss!123
+    expose:
+      - "5432"
+    networks:
+      opengasuu_tutorial:
+        aliases:
+          - opengauss
+    volumes:
+      - opengauss_data:/var/lib/opengauss
+  opengauss_exporter:
+    image: bzp2010/opengauss_exporter:dev
+    command: ["-c", "/etc/opengauss_exporter/config.yaml"]
+    volumes:
+      - ./exporter_config.yaml:/etc/opengauss_exporter/config.yaml:ro
+    ports:
+      - "9188:9188"
+    networks:
+      opengasuu_tutorial:
+        aliases:
+          - exporter
+
+networks:
+  opengasuu_tutorial: {}
+
+volumes:
+  opengauss_data: {}
