@@ -4,7 +4,7 @@
 # openGauss Server Exporter
 Prometheus exporter for openGauss server metrics.
 
-CI Tested openGauss versions: `2.0.1`
+CI Tested openGauss versions: `2.0.1` `2.1.0`
 
 ## Building and running
 > 1. install Golang **1.14+**   
