@@ -19,10 +19,22 @@ services:
       - ./exporter_config.yaml:/etc/opengauss_exporter/config.yaml:ro
     ports:
       - "9188:9188"
+    expose:
+      - "9188"
     networks:
       opengasuu_tutorial:
         aliases:
           - exporter
+  prometheus:
+    image: prom/prometheus:v2.29.2
+    ports:
+      - "9090:9090"
+    networks:
+      opengasuu_tutorial:
+        aliases:
+          - prometheus
+    volumes:
+      - ./prometheus_config.yaml:/etc/prometheus/prometheus.yml
 
 networks:
   opengasuu_tutorial: {}
