@@ -24,6 +24,7 @@ tasks:
       - gs_instance_time
       - gs_total_memory_detail
       - gs_sql_count
+      - example
   - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5433/postgres"
     name: Test Server 2
     duration: 8s

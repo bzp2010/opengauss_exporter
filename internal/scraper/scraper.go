@@ -14,6 +14,9 @@ func Init()  {
 	scrape.RegisterScraper("gs_instance_time", NewGsInstanceTimeScraper())
 	scrape.RegisterScraper("gs_total_memory_detail", NewGsTotalMemoryDetailScraper())
 	scrape.RegisterScraper("gs_sql_count", NewGsSQLCountScraper())
+
+	// example scraper
+	scrape.RegisterScraper("example", NewExampleScraper())
 }
 
 func newDesc(subsystem string, name string, help string, labels prometheus.Labels, hiddenNamespace... bool) *prometheus.Desc {
