@@ -12,6 +12,10 @@ server:               # server configure
     port: 9189        # port eg. 9189
     cert: "/etc/ssl/cert.pem"   # cert file path
     key: "/etc/ssl/private.key" # private key file path
+  middlewares:        # middleware list
+    logger: {}        # logger for HTTP request
+    basic_auth:       # basic auth
+      user: "password"# user list eg. username: password
 
 tasks:    # scrape task configure
   - dsn: "postgresql://gaussdb:gaussdb@127.0.0.1:5432/postgres"
